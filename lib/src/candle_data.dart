@@ -1,41 +1,28 @@
+/// 캔들 데이터 클래스: 차트에서 사용할 개별 데이터 포인트를 정의
 class CandleData {
-  /// The timestamp of this data point, in milliseconds since epoch.
+  /// 데이터 포인트의 타임스탬프 (밀리초 단위, epoch 기준)
   final int timestamp;
 
-  /// The "open" price of this data point. It's acceptable to have null here for
-  /// a few data points, but they must not all be null. If either [open] or
-  /// [close] is null for a data point, it will appear as a gap in the chart.
+  /// "시가" 가격 (null 허용, 일부 데이터가 빠져도 가능)
   final double? open;
 
-  /// The "high" price. If either one of [high] or [low] is null, we won't
-  /// draw the narrow part of the candlestick for that data point.
+  /// "고가" 가격 (null 허용, 데이터가 없으면 심지를 그리지 않음)
   final double? high;
 
-  /// The "low" price. If either one of [high] or [low] is null, we won't
-  /// draw the narrow part of the candlestick for that data point.
+  /// "저가" 가격 (null 허용, 데이터가 없으면 심지를 그리지 않음)
   final double? low;
 
-  /// The "close" price of this data point. It's acceptable to have null here
-  /// for a few data points, but they must not all be null. If either [open] or
-  /// [close] is null for a data point, it will appear as a gap in the chart.
+  /// "종가" 가격 (null 허용, 일부 데이터가 빠져도 가능)
   final double? close;
 
-  /// The volume information of this data point.
+  /// 거래량 데이터 (null 허용)
   final double? volume;
 
-  /// Data holder for additional trend lines, for this data point.
-  ///
-  /// For a single trend line, we can assign it as a list with a single element.
-  /// For example if we want "7 days moving average", do something like
-  /// `trends = [ma7]`. If there are multiple tread lines, we can assign a list
-  /// with multiple elements, like `trends = [ma7, ma30]`.
-  /// If we don't want any trend lines, we can assign an empty list.
-  ///
-  /// This should be an unmodifiable list, so please do not use `add`
-  /// or `clear` methods on the list. Always assign a new list if values
-  /// are changed. Otherwise the UI might not be updated.
+  /// 특정 캔들에 대한 트렌드 라인 데이터 (이동평균선 등)
+  /// 예: `trends = [ma7, ma30]` (7일, 30일 이동평균선)
   List<double?> trends;
 
+  /// 캔들 데이터 생성자
   CandleData({
     required this.timestamp,
     required this.open,
@@ -46,18 +33,14 @@ class CandleData {
     List<double?>? trends,
   }) : this.trends = List.unmodifiable(trends ?? []);
 
+  /// 이동평균(MA) 계산 함수
   static List<double?> computeMA(List<CandleData> data, [int period = 7]) {
-    // If data is not at least twice as long as the period, return nulls.
     if (data.length < period * 2) return List.filled(data.length, null);
-
     final List<double?> result = [];
-    // Skip the first [period] data points. For example, skip 7 data points.
-    final firstPeriod =
-        data.take(period).map((d) => d.close).whereType<double>();
+    final firstPeriod = data.take(period).map((d) => d.close).whereType<double>();
     double ma = firstPeriod.reduce((a, b) => a + b) / firstPeriod.length;
     result.addAll(List.filled(period, null));
 
-    // Compute the moving average for the rest of the data points.
     for (int i = period; i < data.length; i++) {
       final curr = data[i].close;
       final prev = data[i - period].close;

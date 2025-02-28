@@ -52,11 +52,11 @@ class _MyAppState extends State<MyApp> {
         body: SafeArea(
           minimum: const EdgeInsets.all(24.0),
           child: InteractiveChart(
-            /** Only [candles] is required */
+            /** 필수 파라미터는 [candles]뿐입니다. */
             candles: _data,
-            /** Uncomment the following for examples on optional parameters */
+            /** 선택적 파라미터에 대한 예시 (주석 해제 시 사용) */
 
-            /** Example styling */
+            /** 예제 스타일링 */
             // style: ChartStyle(
             //   priceGainColor: Colors.teal[200]!,
             //   priceLossColor: Colors.blueGrey,
@@ -78,19 +78,19 @@ class _MyAppState extends State<MyApp> {
             //   overlayBackgroundColor: Colors.red[900]!.withOpacity(0.6),
             //   overlayTextStyle: TextStyle(color: Colors.red[100]),
             //   timeLabelHeight: 32,
-            //   volumeHeightFactor: 0.2, // volume area is 20% of total height
+            //   volumeHeightFactor: 0.2, // 거래량 영역은 전체 높이의 20%입니다.
             // ),
-            /** Customize axis labels */
+            /** 축 레이블 사용자 정의 */
             // timeLabel: (timestamp, visibleDataCount) => "📅",
             // priceLabel: (price) => "${price.round()} 💎",
-            /** Customize overlay (tap and hold to see it)
-             ** Or return an empty object to disable overlay info. */
+            /** 오버레이 사용자 정의 (길게 눌러서 확인)
+             ** 또는 오버레이 정보를 비활성화하려면 빈 객체를 반환하세요. */
             // overlayInfo: (candle) => {
             //   "💎": "🤚    ",
             //   "Hi": "${candle.high?.toStringAsFixed(2)}",
             //   "Lo": "${candle.low?.toStringAsFixed(2)}",
             // },
-            /** Callbacks */
+            /** 콜백 함수 */
             // onTap: (candle) => print("user tapped on $candle"),
             // onCandleResize: (width) => print("each candle is $width wide"),
           ),

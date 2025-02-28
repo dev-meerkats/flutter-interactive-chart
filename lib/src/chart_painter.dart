@@ -9,6 +9,9 @@ typedef TimeLabelGetter = String Function(int timestamp, int visibleDataCount);
 typedef PriceLabelGetter = String Function(double price);
 typedef OverlayInfoGetter = Map<String, String> Function(CandleData candle);
 
+/// 📌 차트를 그리는 `CustomPainter`
+///
+/// `ChartPainter`는 `PainterParams`를 기반으로 캔들, 가격 라벨, 트렌드 라인 등을 그립니다.
 class ChartPainter extends CustomPainter {
   final PainterParams params;
   final TimeLabelGetter getTimeLabel;
@@ -24,11 +27,11 @@ class ChartPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Draw time labels (dates) & price labels
+    // 📌 차트의 시간 레이블(날짜)과 가격 그리드 라인(수평선)을 그림
     _drawTimeLabels(canvas, params);
     _drawPriceGridAndLabels(canvas, params);
 
-    // Draw prices, volumes & trend line
+    // 📌 가격 및 거래량 막대, 트렌드 라인을 그림
     canvas.save();
     canvas.clipRect(Offset.zero & Size(params.chartWidth, params.chartHeight));
     // canvas.drawRect(
@@ -42,7 +45,7 @@ class ChartPainter extends CustomPainter {
     }
     canvas.restore();
 
-    // Draw tap highlight & overlay
+    // 📌 사용자가 클릭(또는 호버)한 경우, 선택된 영역을 강조
     if (params.tapPosition != null) {
       if (params.tapPosition!.dx < params.chartWidth) {
         _drawTapHighlightAndOverlay(canvas, params);
@@ -50,6 +53,7 @@ class ChartPainter extends CustomPainter {
     }
   }
 
+  /// 🔹 차트 하단에 날짜(시간) 라벨을 그림
   void _drawTimeLabels(canvas, PainterParams params) {
     // We draw one time label per 90 pixels of screen width
     final lineCount = params.chartWidth ~/ 90;
@@ -69,7 +73,7 @@ class ChartPainter extends CustomPainter {
           ..textDirection = TextDirection.ltr
           ..layout();
 
-        // Align texts towards vertical bottom
+        // ⬇️ 날짜 텍스트를 차트 아래쪽에 정렬
         final topPadding = params.style.timeLabelHeight - timeTp.height;
         timeTp.paint(
           canvas,
@@ -79,6 +83,7 @@ class ChartPainter extends CustomPainter {
     }
   }
 
+  /// 🔹 차트에 수평 가격 그리드 라인과 가격 라벨을 그림
   void _drawPriceGridAndLabels(canvas, PainterParams params) {
     [0.0, 0.25, 0.5, 0.75, 1.0]
         .map((v) => ((params.maxPrice - params.minPrice) * v) + params.minPrice)
@@ -107,6 +112,7 @@ class ChartPainter extends CustomPainter {
     });
   }
 
+  /// 🔹 개별 캔들, 거래량 막대, 트렌드 라인을 그림
   void _drawSingleDay(canvas, PainterParams params, int i) {
     final candle = params.candles[i];
     final x = i * params.candleWidth;
@@ -118,9 +124,7 @@ class ChartPainter extends CustomPainter {
     final high = candle.high;
     final low = candle.low;
     if (open != null && close != null) {
-      final color = open > close
-          ? params.style.priceLossColor
-          : params.style.priceGainColor;
+      final color = open > close ? params.style.priceLossColor : params.style.priceGainColor;
       canvas.drawLine(
         Offset(x, params.fitPrice(open)),
         Offset(x, params.fitPrice(close)),
@@ -138,7 +142,8 @@ class ChartPainter extends CustomPainter {
         );
       }
     }
-    // Draw volume bar
+
+    // 🔹 거래량 막대 그리기
     final volume = candle.volume;
     if (volume != null) {
       canvas.drawLine(
@@ -170,8 +175,7 @@ class ChartPainter extends CustomPainter {
         // In the front, draw an extra line connecting to out-of-window data
         if (pt != null && params.leadingTrends?.at(j) != null) {
           canvas.drawLine(
-            Offset(x - params.candleWidth,
-                params.fitPrice(params.leadingTrends!.at(j)!)),
+            Offset(x - params.candleWidth, params.fitPrice(params.leadingTrends!.at(j)!)),
             Offset(x, params.fitPrice(pt)),
             trendLinePaint,
           );
@@ -192,13 +196,14 @@ class ChartPainter extends CustomPainter {
     }
   }
 
+  /// 🔹 사용자가 선택한 캔들(클릭 또는 호버) 강조
   void _drawTapHighlightAndOverlay(canvas, PainterParams params) {
     final pos = params.tapPosition!;
     final i = params.getCandleIndexFromOffset(pos.dx);
     final candle = params.candles[i];
     canvas.save();
     canvas.translate(params.xShift, 0.0);
-    // Draw highlight bar (selection box)
+    // 🔹 선택한 캔들 강조 표시
     canvas.drawLine(
         Offset(i * params.candleWidth, 0.0),
         Offset(i * params.candleWidth, params.chartHeight),
@@ -210,6 +215,7 @@ class ChartPainter extends CustomPainter {
     _drawTapInfoOverlay(canvas, params, candle);
   }
 
+  // 🔹 선택한 캔들의 상세 정보 오버레이 표시
   void _drawTapInfoOverlay(canvas, PainterParams params, CandleData candle) {
     final xGap = 8.0;
     final yGap = 4.0;
@@ -287,8 +293,7 @@ class ChartPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(ChartPainter oldDelegate) =>
-      params.shouldRepaint(oldDelegate.params);
+  bool shouldRepaint(ChartPainter oldDelegate) => params.shouldRepaint(oldDelegate.params);
 }
 
 extension ElementAtOrNull<E> on List<E> {
